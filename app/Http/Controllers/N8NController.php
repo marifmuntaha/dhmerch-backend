@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\n8n;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Whatsapp;
 use Carbon\Carbon;
@@ -11,7 +10,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class OrderController extends Controller
+class N8NController extends Controller
 {
     public function store(Request $request)
     {

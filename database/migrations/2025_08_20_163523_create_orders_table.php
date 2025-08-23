@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('size');
             $table->string('arm');
             $table->string('price');
+            $table->enum('payment', ['1', '2'])->default('1');
             $table->enum('status', [1, 2, 3])->default(1)->comment('1. Belum Bayar, 2. Lunas, 3. Sudah diambil');
             $table->string('reference')->nullable();
             $table->string('payCode')->nullable();

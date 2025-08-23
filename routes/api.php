@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\n8n\OrderController;
-use App\Http\Controllers\n8n\WhatsappController;
+use App\Http\Controllers\N8NController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WhatsappController;
 use App\Http\Middleware\EnsureTokenIsValid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::apiResource('/order', OrderController::class)->except(['update']);
+});
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -24,6 +29,6 @@ Route::get('/notifications', function (Request $request) {
 
 Route::group(['middleware' => EnsureTokenIsValid::class, 'prefix' => 'n8n'], function () {
     Route::post('/whatsapp', [WhatsappController::class, 'index']);
-    Route::post('/order', [OrderController::class, 'store']);
+    Route::post('/order', [N8NController::class, 'store']);
 });
-Route::post('/order/callback', [OrderController::class, 'handle']);
+Route::post('/order/callback', [N8NController::class, 'handle']);

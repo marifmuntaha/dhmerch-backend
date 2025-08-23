@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\n8n;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Whatsapp;
 use Carbon\Carbon;

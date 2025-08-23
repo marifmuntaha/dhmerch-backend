@@ -18,6 +18,7 @@ class Order extends Model
         'arm',
         'price',
         'status',
+        'payment',
         'reference',
         'payCode',
     ];
