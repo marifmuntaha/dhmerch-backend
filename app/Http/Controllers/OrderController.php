@@ -56,6 +56,21 @@ class OrderController extends Controller
         }
     }
 
+    public function update(Request $request, Order $order)
+    {
+        try {
+            return $order->update(array_filter($request->all()))
+                ? response([
+                    'result' => new OrderResource($order),
+                    'message' => 'Pesanan berhasil diubah!'
+                ]) : throw new Exception('Pesanan gagal diubah!');
+        } catch (Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function destroy(Order $order)
     {
         try {

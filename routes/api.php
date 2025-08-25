@@ -13,7 +13,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::apiResource('/order', OrderController::class)->except(['update']);
+    Route::apiResource('/order', OrderController::class);
 });
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
