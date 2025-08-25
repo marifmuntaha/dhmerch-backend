@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\N8NController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WhatsappController;
 use App\Http\Middleware\EnsureTokenIsValid;
 use Illuminate\Http\Request;
@@ -14,6 +16,9 @@ Route::get('/user', function (Request $request) {
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::apiResource('/order', OrderController::class);
+    Route::apiResource('/product', ProductController::class);
+    Route::post('/payment/midtrans/create', [PaymentController::class, 'midtrans']);
+
 });
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
