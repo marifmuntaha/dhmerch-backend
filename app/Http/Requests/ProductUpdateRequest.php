@@ -23,7 +23,7 @@ class ProductUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|unique:products,code',
+            'sku' => 'required|unique:products,sku',
             'name' => 'required',
             'description' => 'nullable',
             'price' => 'required',
@@ -38,7 +38,7 @@ class ProductUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'code' => 'Kode',
+            'sku' => 'SKU',
             'name' => 'Nama',
             'description' => 'Diskripsi',
             'price' => 'Harga',

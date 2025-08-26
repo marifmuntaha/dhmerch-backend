@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique();
+            $table->string('sku')->unique();
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('price');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->mediumText('size');
             $table->mediumText('arm');
             $table->string('image');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['1', '2'])->default('1');
             $table->timestamps();
         });
     }
