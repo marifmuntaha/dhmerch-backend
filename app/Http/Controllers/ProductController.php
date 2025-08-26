@@ -7,6 +7,8 @@ use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Exception;
+use Illuminate\Support\Facades\Storage;
+
 //use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -29,6 +31,12 @@ class ProductController extends Controller
     public function store(ProductStoreRequest $request)
     {
         try {
+            if ($request->hasFile('file')) {
+                $image = $request->file('file');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->storeAs(('images'), $imageName, 'public');
+                $request->request->add(['image' => 'images/'.$imageName]);
+            }
             return ($product = Product::create($request->all()))
                 ? response([
                     'result' => new ProductResource($product),

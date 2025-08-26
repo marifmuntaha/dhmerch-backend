@@ -27,10 +27,9 @@ class ProductUpdateRequest extends FormRequest
             'name' => 'required',
             'description' => 'nullable',
             'price' => 'required',
-            'color' => 'required',
             'size' => 'required',
             'arm' => 'required',
-            'image' => 'required',
+            'file' => 'required',
             'status' => 'required',
         ];
     }
@@ -42,10 +41,9 @@ class ProductUpdateRequest extends FormRequest
             'name' => 'Nama',
             'description' => 'Diskripsi',
             'price' => 'Harga',
-            'color' => 'Warna',
             'size' => 'Ukuran',
             'arm' => 'Lengan',
-            'image' => 'Gambar',
+            'file' => 'Gambar',
             'status' => 'Status',
         ];
     }

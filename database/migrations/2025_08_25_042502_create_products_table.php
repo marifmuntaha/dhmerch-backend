@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('price');
-            $table->mediumText('color');
             $table->mediumText('size');
             $table->mediumText('arm');
             $table->string('image');
