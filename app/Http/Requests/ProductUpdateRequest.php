@@ -23,7 +23,7 @@ class ProductUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sku' => 'required|unique:products,sku',
+            'sku' => 'required',
             'name' => 'required',
             'description' => 'nullable',
             'price' => 'required',

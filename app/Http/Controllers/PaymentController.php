@@ -11,27 +11,26 @@ class PaymentController extends Controller
     /**
      * @throws Exception
      */
-    public function midtrans(Request $request)
+    public function midtransCreate(Request $request)
     {
         $client = new Client();
         $body = [
             "payment_type" => "bank_transfer",
+            "bank_transfer" => ["bank" => "bri"],
             "transaction_details" => [
-                "order_id" => "order-id-124",
-                "gross_amount" => 100000
+                "order_id" => $request->code,
+                "gross_amount" => $request->amount
             ],
             "customer_details" => [
-                "first_name" => "Budi",
-                "last_name" => "Utomo",
-                "email" => "budi.utomo@midtrans.com",
-                "phone" => "081223323423",
+                "first_name" => $request->name,
+                "last_name" => "",
+                "email" => "merch@darul-hikmah.sch.id",
+                "phone" => $request->phone,
             ],
-//            "item_details" => '[{"id": "1388998298204", "price": 5000, "quantity": 1, "name": "Ayam Zozozo"}]',
             "custom_expiry" => [
                 "expiry_duration" => 2,
                 "unit" => "day"
             ],
-            "bank_transfer" => ["bank" => "bri"]
         ];
         try {
             $response = $client->request('POST', config('midtrans.api_url').'charge', [
@@ -41,10 +40,10 @@ class PaymentController extends Controller
                     'authorization' => 'Basic '. base64_encode(config('midtrans.server_key').":"),
                     'content-type' => 'application/json',
                 ],
-            ])->getBody()->getContents();
+            ])->getBody();
             $response = json_decode($response);
             return $response->status_code == 201 ? response([
-                'result' => $response->status_message,
+                'result' => $response,
                 'message' => 'Generate pembayaran berhasil.'
             ]) : throw new Exception($response->status_message);
         } catch (GuzzleException $e) {
@@ -52,5 +51,10 @@ class PaymentController extends Controller
                 'message' => $e->getMessage()
             ], 422);
         }
+    }
+
+    public function midtransCallback()
+    {
+
     }
 }

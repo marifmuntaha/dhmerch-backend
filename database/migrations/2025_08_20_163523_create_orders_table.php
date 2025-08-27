@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('address');
             $table->string('phone');
             $table->string('productId');
-            $table->string('type');
             $table->string('size');
             $table->string('arm');
             $table->string('price');

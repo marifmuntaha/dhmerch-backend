@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
             'image' => Storage::disk('public')->url($this->image),
             'status' => $this->status,
         ];
+
         return $resource;
     }
 }

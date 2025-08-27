@@ -15,7 +15,6 @@ class Order extends Model
         'address',
         'phone',
         'productId',
-        'type',
         'size',
         'arm',
         'price',

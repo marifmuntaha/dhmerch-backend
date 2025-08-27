@@ -17,7 +17,7 @@ Route::get('/user', function (Request $request) {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::apiResource('/order', OrderController::class);
     Route::apiResource('/product', ProductController::class);
-    Route::post('/payment/midtrans/create', [PaymentController::class, 'midtrans']);
+    Route::post('/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
 
 });
 Route::prefix('auth')->group(function () {
