@@ -36,4 +36,5 @@ Route::group(['middleware' => EnsureTokenIsValid::class, 'prefix' => 'n8n'], fun
     Route::post('/whatsapp', [WhatsappController::class, 'index']);
     Route::post('/order', [N8NController::class, 'store']);
 });
-Route::post('/order/callback', [N8NController::class, 'handle']);
+
+Route::post('/payment/midtrans/callback', [PaymentController::class, 'midtransCallback']);

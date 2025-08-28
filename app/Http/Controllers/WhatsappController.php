@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Whatsapp;
 use Carbon\Carbon;
-use Illuminate\Http\Client\ConnectionException;
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class WhatsappController extends Controller
@@ -29,17 +31,20 @@ class WhatsappController extends Controller
                     $message .= "*Nama:* " . PHP_EOL;
                     $message .= "*Alamat:* " . PHP_EOL;
                     $message .= "*Nomor WA:* " . PHP_EOL;
-                    $message .= "*Kode Produk:* DM-251" . PHP_EOL;
-                    $message .= "*Tipe:* Anak/Dewasa" . PHP_EOL;
+                    $message .= "*Kode Produk:* DM-211/DM-212/DM-213" . PHP_EOL;
                     $message .= "*Size:* XS/S/M/L/XL/XXL/3XL/4XL" . PHP_EOL;
                     $message .= "*Lengan:* Panjang/Pendek";
                     return response([
                         'message' => $message,
                     ]);
                 } else if ($request->message == '2') {
+                    $product = Product::get();
+                    $image = $product->map(function ($item) {
+                        return asset(Storage::url($item->image));
+                    });
                     return response([
                         'message' => $this->messageMain($client),
-                        'image' => asset(Storage::url('public/images/4.jpeg')),
+                        'image' => $image,
                     ]);
                 } else if ($request->message == '3') {
                     $order = Order::whereWhatsappid($request->whatsappId)->orderBy('created_at', 'desc')->get();
@@ -71,44 +76,63 @@ class WhatsappController extends Controller
             } else if ($client->session == '2') {
                 if ($request->message == '1') {
                     $order = Order::whereWhatsappid($request->whatsappId)->latest()->first();
-                    $data = [
-                        'method' => 'BRIVA',
-                        'merchant_ref' => $order->code,
-                        'amount' => (int)$order->price,
-                        'customer_name' => $order->name,
-                        'customer_email' => 'merch@darul-hikmah.sch.id',
-                        'customer_phone' => $order->phone,
-                        'order_items' => [
-                            [
-                                'sku' => $order->productId,
-                                'name' => 'KAOS HARLAH ' . $order->productId,
-                                'price' => (int)$order->price,
-                                'quantity' => 1,
-                                'product_url' => '#',
-                                'image_url' => '#',
-                            ],
+                    $body = [
+                        "payment_type" => "bank_transfer",
+                        "bank_transfer" => ["bank" => "bri"],
+                        "transaction_details" => [
+                            "order_id" => $this->generateUniqueRandomString(),
+                            "gross_amount" => $order->price
                         ],
-                        'expired_time' => (time() + (48 * 60 * 60)), // 24 jam
-                        'signature' => hash_hmac('sha256', config('tripay.merchantCode') . $order->code . (int)$order->price, config('tripay.privateKey')),
+                        "item_details" => [
+                            [
+                                "id" => $order->productId,
+                                'price' => $order->price,
+                                'quantity' => '1',
+                                'name' => $order->productId,
+                            ]
+                        ],
+                        "customer_details" => [
+                            "first_name" => $order->name,
+                            "last_name" => "",
+                            "email" => "merch@darul-hikmah.sch.id",
+                            "phone" => $order->phone,
+                        ],
+                        "custom_expiry" => [
+                            "expiry_duration" => 2,
+                            "unit" => "day"
+                        ],
                     ];
                     try {
-                        $response = Http::withHeaders([
-                            'Content-Type' => 'application/json',
-                            'Accept' => 'application/json',
-                            'Authorization' => 'Bearer ' . config('tripay.apiKey'),
-                        ])
-                            ->post('https://tripay.co.id/api-sandbox/transaction/create', $data);
-                        $payment = $response->json('data');
-                        $order = Order::whereWhatsappid($request->whatsappId)->latest()->first();
-                        $order->reference = $payment['reference'];
-                        $order->payCode =$payment['pay_code'];
-                        $order->save();
-                        $message = "Terimakasih telah melakukan pesanan." . PHP_EOL;
-                        $message .= "Nomor Pesanan anda adalah: " . $order->code . PHP_EOL;
-                        $message .= "Kode pembayaran anda adalah : *BRIVA " . $payment['pay_code'] . "*" . PHP_EOL;
-                        $message .= "Silahkan melakukan pembayaran sebelum " . Carbon::createFromTimestamp($payment['expired_time'])->translatedFormat('d F Y H:i').PHP_EOL;
-                        $message .= "00. Kembali".PHP_EOL;
-                    } catch (ConnectionException $e) {
+                        $client = new Client();
+                        $response = $client->request('POST', config('midtrans.api_url').'charge', [
+                            'body' => json_encode($body),
+                            'headers' => [
+                                'accept' => 'application/json',
+                                'authorization' => 'Basic '. base64_encode(config('midtrans.server_key').":"),
+                                'content-type' => 'application/json',
+                            ],
+                        ])->getBody()->getContents();
+                        $response = json_decode($response);
+                        if($response->status_code == 201) {
+                            $order->reference = $response->transaction_id;
+                            $order->payCode =$response->va_numbers[0]->va_number;
+                            $order->save();
+                            $message = "Terimakasih telah melakukan pesanan." . PHP_EOL;
+                            $message .= "Nomor Pesanan anda adalah: " . $order->code . PHP_EOL;
+                            $message .= "Kode pembayaran anda adalah : *BRIVA " . $order->payCode . "*" . PHP_EOL;
+                            $message .= "Silahkan melakukan pembayaran sebelum " . Carbon::now()->addDays(2)->translatedFormat('d F Y H:i').PHP_EOL;
+                            $message .= "00. Kembali".PHP_EOL;
+                            return response([
+                                'message' => $message,
+                            ]);
+                        }
+                        else {
+                            throw new  Exception("Transaksi gagal, silahkan coba lagi.");
+                        }
+                    } catch (GuzzleException $e) {
+                        $message = $e->getMessage();
+                    }
+                    catch (Exception $e) {
                         $message = $e->getMessage();
                     }
                     return response([
@@ -170,5 +194,14 @@ class WhatsappController extends Controller
             '3' => 'Sudah Diambil',
             default => 'Menunggu Konfirmasi',
         };
+    }
+
+    private function generateUniqueRandomString()
+    {
+        do {
+            $randomNumber = mt_rand(10000000, 99999999);
+        } while (Order::whereCode($randomNumber)->exists());
+
+        return $randomNumber;
     }
 }
