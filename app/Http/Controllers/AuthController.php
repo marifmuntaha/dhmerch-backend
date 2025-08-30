@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginStoreRequest;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -61,8 +62,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            return ($status = $request->user('sanctum')->currentAccessToken()->delete)
+            $user = User::find($request->user('sanctum')->id);
+            return ($status = $user->tokens()->delete())
                 ? response([
+                    'result' => [],
                     'message' => 'Berhasil keluar.',
                 ]) : throw new Exception(__($status));
         } catch (Exception $exception) {

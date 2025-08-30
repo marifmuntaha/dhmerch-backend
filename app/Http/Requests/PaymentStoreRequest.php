@@ -25,7 +25,8 @@ class PaymentStoreRequest extends FormRequest
         return [
             'name' => 'required',
             'phone' => 'required',
-            'address' => 'required',
+            'amount' => 'required',
+            'productId' => 'required',
         ];
     }
 
@@ -34,7 +35,8 @@ class PaymentStoreRequest extends FormRequest
         return [
             'name' => 'Nama Lengkap',
             'phone' => 'Nomor WA',
-            'address' => 'Alamat',
+            'amount' => 'Alamat',
+            'productId' => 'SKU Produk',
         ];
     }
 }

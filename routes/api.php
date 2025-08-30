@@ -17,23 +17,28 @@ Route::get('/user', function (Request $request) {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::apiResource('/order', OrderController::class);
     Route::apiResource('/product', ProductController::class);
-
+    Route::post('/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
+    Route::prefix('n8n')->group(function () {
+        Route::post('/whatsapp', [WhatsappController::class, 'index']);
+        Route::post('/order', [N8NController::class, 'store']);
+    });
+});
+Route::group(['middleware' => EnsureTokenIsValid::class], function () {
+    Route::get('/public/product', [ProductController::class, 'index']);
+    Route::post('/public/order', [OrderController::class, 'store']);
+    Route::post('/public/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
+    Route::prefix('n8n')->group(function () {
+        Route::post('/whatsapp', [WhatsappController::class, 'index']);
+        Route::post('/order', [N8NController::class, 'store']);
+    });
 });
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-//    Route::post('/forget-password', [AuthController::class, 'forgetPassword']);
-//    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 Route::get('/notifications', function (Request $request) {
     return response([
         'result' => [],
     ]);
 });
-
-Route::group(['middleware' => EnsureTokenIsValid::class, 'prefix' => 'n8n'], function () {
-    Route::post('/whatsapp', [WhatsappController::class, 'index']);
-    Route::post('/order', [N8NController::class, 'store']);
-});
-Route::post('/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
 Route::post('/payment/midtrans/callback', [PaymentController::class, 'midtransCallback']);
