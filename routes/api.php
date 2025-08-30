@@ -17,7 +17,6 @@ Route::get('/user', function (Request $request) {
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::apiResource('/order', OrderController::class);
     Route::apiResource('/product', ProductController::class);
-    Route::post('/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
 
 });
 Route::prefix('auth')->group(function () {
@@ -36,5 +35,5 @@ Route::group(['middleware' => EnsureTokenIsValid::class, 'prefix' => 'n8n'], fun
     Route::post('/whatsapp', [WhatsappController::class, 'index']);
     Route::post('/order', [N8NController::class, 'store']);
 });
-
+Route::post('/payment/midtrans/create', [PaymentController::class, 'midtransCreate']);
 Route::post('/payment/midtrans/callback', [PaymentController::class, 'midtransCallback']);

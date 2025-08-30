@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentStoreRequest;
 use App\Models\Order;
 use Carbon\Carbon;
 use Exception;
@@ -16,36 +17,36 @@ class PaymentController extends Controller
     /**
      * @throws Exception
      */
-    public function midtransCreate(Request $request)
+    public function midtransCreate(PaymentStoreRequest $request)
     {
-        $client = new Client();
-        $body = [
-            "payment_type" => "bank_transfer",
-            "bank_transfer" => ["bank" => "bri"],
-            "transaction_details" => [
-                "order_id" => $this->generateUniqueRandomString(),
-                "gross_amount" => $request->amount
-            ],
-            "item_details" => [
-                [
-                    "id" => $request->productId,
-                    'price' => $request->amount,
-                    'quantity' => '1',
-                    'name' => $request->productId,
-                ]
-            ],
-            "customer_details" => [
-                "first_name" => $request->name,
-                "last_name" => "",
-                "email" => "merch@darul-hikmah.sch.id",
-                "phone" => $request->phone,
-            ],
-            "custom_expiry" => [
-                "expiry_duration" => 2,
-                "unit" => "day"
-            ],
-        ];
         try {
+            $client = new Client();
+            $body = [
+                "payment_type" => "bank_transfer",
+                "bank_transfer" => ["bank" => "bri"],
+                "transaction_details" => [
+                    "order_id" => $this->generateUniqueRandomString(),
+                    "gross_amount" => $request->amount
+                ],
+                "item_details" => [
+                    [
+                        "id" => $request->productId,
+                        'price' => $request->amount,
+                        'quantity' => '1',
+                        'name' => $request->productId,
+                    ]
+                ],
+                "customer_details" => [
+                    "first_name" => $request->name,
+                    "last_name" => "",
+                    "email" => "merch@darul-hikmah.sch.id",
+                    "phone" => $request->phone,
+                ],
+                "custom_expiry" => [
+                    "expiry_duration" => 2,
+                    "unit" => "day"
+                ],
+            ];
             $response = $client->request('POST', config('midtrans.api_url').'charge', [
                 'body' => json_encode($body),
                 'headers' => [

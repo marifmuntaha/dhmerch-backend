@@ -8,17 +8,24 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Exception;
 
-//use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             $products = new Product();
-            $products = $products->orderBy('created_at', 'desc')->get();
+            if ($request->has('sku')) {
+                $products = new ProductResource($products->whereSku($request->sku)->first());
+            } else if ($request->has('status')) {
+                $products = ProductResource::collection($products->whereStatus($request->status)->get());
+            }
+            else {
+                $products = ProductResource::collection($products->orderBy('created_at', 'desc')->get());
+            }
             return response([
-                'result' => ProductResource::collection($products),
+                'result' => $products,
             ]);
         } catch (Exception $e) {
             return response([
